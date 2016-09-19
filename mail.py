@@ -20,7 +20,7 @@ def send(sender, receiver, content):
     smtp = smtplib.SMTP()
     try:
         smtp.connect('smtp.163.com', '25')
-        smtp.login(sender, '9035570095')
+        smtp.login(sender, 'zhouyaoyang')
         smtp.sendmail(sender, receiver, msg.as_string())
         smtp.quit()
         print 'Sent'

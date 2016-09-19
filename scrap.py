@@ -10,8 +10,8 @@ from mail import send
 
 mail_sender = 'diamondzyy@163.com'
 mail_receiver = '1058149101@qq.com'
-target_url_head = 'https://s.2.taobao.com/list/list.htm?q='
-target_url_tail = '&search_type=item&app=shopsearch'
+target_url_head = 'https://s.2.taobao.com/list/list.htm?spm=2007.1000337.6.2.x7MnnJ&st_edtime=1&q='
+target_url_tail = '&ist=0'
 
 test = False
 
@@ -64,10 +64,13 @@ def scrap_page(url, expected_price, history_list):
 
 
 expected_prices = dict()
-expected_prices['fx4300'] = 240
+expected_prices['fx4300'] = 260
 expected_prices['fx6300'] = 320
 expected_prices['樱桃茶轴'] = 120
 expected_prices['樱桃青轴'] = 120
+expected_prices['魅族mx2'] = 120
+expected_prices['魅族mx3'] = 150
+expected_prices['魅蓝'] = 200
 
 
 def main():
