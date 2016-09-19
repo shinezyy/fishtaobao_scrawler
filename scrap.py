@@ -10,10 +10,11 @@ from mail import send
 
 mail_sender = 'diamondzyy@163.com'
 mail_receiver = '1058149101@qq.com'
-target_url_head = 'https://s.2.taobao.com/list/list.htm?spm=2007.1000337.6.2.x7MnnJ&st_edtime=1&q='
+target_url_head = 'https://s.2.taobao.com/list/list.htm?' \
+        'spm=2007.1000337.6.2.x7MnnJ&st_edtime=1&q='
 target_url_tail = '&ist=0'
 
-test = False
+test = True
 
 
 def gen_req(url):
@@ -71,6 +72,10 @@ expected_prices['樱桃青轴'] = 120
 expected_prices['魅族mx2'] = 120
 expected_prices['魅族mx3'] = 150
 expected_prices['魅蓝'] = 200
+expected_prices['i5+3470'] = 500
+expected_prices['i3+3240'] = 340
+expected_prices['i3+3220'] = 330
+
 
 
 def main():
@@ -84,15 +89,20 @@ def main():
             for k in expected_prices:
                 item = urllib.quote(k.decode('utf-8').encode('gbk'))
                 print '正在爬取', k, 'Escaped:', item
-                # print target_url_head+item+target_url_tail
-                new_list = scrap_page(target_url_head+k+target_url_tail, expected_prices[k], history_list)
+                if test:
+                    print target_url_head+item+target_url_tail
+                new_list = scrap_page(target_url_head+k+target_url_tail, \
+                                      expected_prices[k], history_list)
                 if new_list:
                     with open('history.txt', 'a') as f:
                         for line in new_list:
                             print >>f, line
         except Exception as e:
             print e
-        time.sleep(600)
+        if test:
+            time.sleep(5)
+        else:
+            time.sleep(600)
 
 
 if __name__ == '__main__':
