@@ -92,7 +92,7 @@ def main():
                             print >>f, line
         except Exception as e:
             print e
-        time.sleep(10)
+        time.sleep(600)
 
 
 if __name__ == '__main__':
