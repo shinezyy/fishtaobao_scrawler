@@ -1,15 +1,19 @@
-# -*- coding:utf8 -*-
+# -*- coding:utf-8 -*-
 
 
 from bs4 import BeautifulSoup
 import urllib2
+import urllib
 import re
 from mail import send
 
 
 mail_sender = 'diamondzyy@163.com'
 mail_receiver = '1058149101@qq.com'
-target_url = 'https://s.2.taobao.com/list/list.htm?q=fx+4300&search_type=item&app=shopsearch'
+target_url_head = 'https://s.2.taobao.com/list/list.htm?q='
+target_url_tail = '&search_type=item&app=shopsearch'
+
+test = True
 
 
 def gen_req(url):
@@ -43,7 +47,22 @@ def scrap_page(url, expected_price):
         a = li.findChild('a')
         link = 'http:' + a['href']
         title = unicode(a.findChild('img')['alt'])
-        send(mail_sender, mail_receiver, title+'\n'+link)
+        if test:
+            print title
+            print link
+        else:
+            send(mail_sender, mail_receiver, title+'\n'+link)
 
 
-scrap_page(target_url, 10000)
+expected_prices = dict()
+expected_prices['fx4300'] = 240
+expected_prices['fx6300'] = 320
+expected_prices['樱桃茶轴'] = 120
+expected_prices['樱桃青轴'] = 120
+
+
+for k in expected_prices:
+    item = urllib.quote(k.decode('utf-8').encode('gbk'))
+    print k, item
+    print target_url_head+item+target_url_tail
+    scrap_page(target_url_head+k+target_url_tail, expected_prices[k])
