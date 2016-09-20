@@ -9,12 +9,12 @@ from mail import send
 
 
 mail_sender = 'diamondzyy@163.com'
-mail_receiver = '1058149101@qq.com'
+mail_receiver = 'diamondzyy@sina.cn'
 target_url_head = 'https://s.2.taobao.com/list/list.htm?' \
         'spm=2007.1000337.6.2.x7MnnJ&st_edtime=1&q='
 target_url_tail = '&ist=0'
 
-test = True
+test = False
 
 
 def gen_req(url):
@@ -65,20 +65,43 @@ def scrap_page(url, expected_price, history_list):
 
 
 expected_prices = dict()
-expected_prices['fx4300'] = 260
-expected_prices['fx6300'] = 320
+expected_prices['fx4300'] = 230
+expected_prices['fx6300'] = 335
 expected_prices['樱桃茶轴'] = 120
 expected_prices['樱桃青轴'] = 120
 expected_prices['魅族mx2'] = 120
-expected_prices['魅族mx3'] = 150
-expected_prices['魅蓝'] = 200
-expected_prices['i5+3470'] = 500
-expected_prices['i3+3240'] = 340
-expected_prices['i3+3220'] = 330
+expected_prices['魅族mx3'] = 200
+expected_prices['魅蓝'] = 250
 
+raw_1155 = '''G530 = 100
+                 G540 = 110
+    G620 = 110
+                 G630 = 130
+                G640 = 140
+                G1620 = 160
+                I3 2100 = 300
+I3 2120 = 310
+I3 2130 = 310
+                  I3 3220 = 370
+I3 3240 = 380
+                  I5 2300 = 480
+                   I5 2320 = 500
+                   I5 2400 = 530
+                             I5 3470 = 660'''
+
+
+def preproc_price():
+    prices_1155 = raw_1155.split('\n')
+    for line in prices_1155:
+        item, price = line.lstrip(' ').rstrip(' ').split(' = ')
+        item = item.replace(' ', '+')
+        price = int(price)
+        print item, price
+        expected_prices[item] = price - 25
 
 
 def main():
+    preproc_price()
     while True:
         try:
             history_list = []
@@ -88,10 +111,10 @@ def main():
                     history_list.append(int(line))
             for k in expected_prices:
                 item = urllib.quote(k.decode('utf-8').encode('gbk'))
-                print '正在爬取', k, 'Escaped:', item
+                print '正在爬取', k, 'Escaped:', item, 'Expected Price:', expected_prices[k]
                 if test:
                     print target_url_head+item+target_url_tail
-                new_list = scrap_page(target_url_head+k+target_url_tail, \
+                new_list = scrap_page(target_url_head+k+target_url_tail,
                                       expected_prices[k], history_list)
                 if new_list:
                     with open('history.txt', 'a') as f:
