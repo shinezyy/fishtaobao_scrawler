@@ -34,6 +34,15 @@ def link_to_id(link):
     return int(link.split('id=')[1])
 
 
+black_list = [
+    u'手机',
+    u'坏',
+    u'收',
+    u'尸体',
+    u'华为'
+]
+
+
 def scrap_page(url, expected_price, history_list):
     req = gen_req(url)
     r = urllib2.urlopen(req).read()
@@ -55,6 +64,15 @@ def scrap_page(url, expected_price, history_list):
         title = unicode(a.findChild('img')['alt'])
         if link_to_id(link) in history_list:
             continue
+
+        black = False
+        for word in black_list:
+            if word in title:
+                black = True
+                break
+        if black:
+            continue
+
         item_list.append(link_to_id(link))
         if test:
             print title
