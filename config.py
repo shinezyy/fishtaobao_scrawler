@@ -1,2 +1,2 @@
-Testing = False
+Testing = True
 delta_price = 20
