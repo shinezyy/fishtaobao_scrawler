@@ -44,10 +44,11 @@ black_list = [
     u'求购',
     u'主板',
     u'计算器',
+    u'转卖',
 ]
 
 
-def scrap_page(url, expected_price, history_list):
+def fish_scrawler(url, expected_price, history_list):
     req = gen_req(url)
     r = urllib2.urlopen(req).read()
     soup = BeautifulSoup(r, "html.parser")
@@ -108,9 +109,44 @@ def preproc_price():
         expected_prices[item] = price
 
 
+scrawl_fish = True
+
+
+def gz_board_scrawler(url, history_list):
+    req = gen_req(url)
+    r = urllib2.urlopen(req).read()
+    soup = BeautifulSoup(r, "html.parser")
+    # print soup.prettify()
+    bodies = soup.find_all('tbody')
+    thread_list = []
+    for bd in bodies:
+        if not bd['id'].startswith('normal'):
+            continue
+        tid = int(bd['id'].split('_')[1])
+        if tid in history_list:
+            continue
+        title = bd.findChild('a', class_='s xst')
+        link = title['href']
+        title_string = title.contents[0]
+        thread_list.append((title_string, link))
+    return thread_list
+
+gz_url = 'http://we.poppur.com/forum.php?mod=forumdisplay&fid=298&filter=author&orderby=dateline&typeid=50'
+
+
+def gz_thread(url, expected_price):
+    req = gen_req(url)
+    r = urllib2.urlopen(req).read()
+    soup = BeautifulSoup(r, "html.parser")
+    # print soup.prettify()
+    div = soup.findChild('div', class_='t_fsz')
+    content = div.findChild('font').string
+    return content
+
+
 def main():
     preproc_price()
-    while True:
+    while scrawl_fish:
         try:
             history_list = []
             # read history
@@ -122,20 +158,24 @@ def main():
                 print '正在爬取', k, 'Escaped:', item, 'Expected Price:', expected_prices[k]
                 if config.Testing:
                     print target_url_head + item + target_url_tail
-                new_list = scrap_page(target_url_head+k+target_url_tail,
-                                      expected_prices[k], history_list)
-                time.sleep(random.randint(1, 8))
+                new_list = fish_scrawler(target_url_head + k + target_url_tail,
+                                         expected_prices[k], history_list)
+                time.sleep(random.randint(1, 3))
                 if new_list:
                     with open('history.txt', 'a') as f:
                         for line in new_list:
                             print >>f, line
         except Exception as e:
             print e
+
         print '-------------------------------------------------------'
         if config.Testing:
             time.sleep(1)
         else:
             time.sleep(300)
+
+    # gz_board_scrawler(gz_url, [])
+    # gz_thread(gz_url, 0)
 
 
 if __name__ == '__main__':
