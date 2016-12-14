@@ -65,6 +65,7 @@ def find_house(url, history_list):
                             break
                         print title
                         print link
+                        send(mail_sender, mail_receiver, title.decode('utf8')+'\n'+link)
                         history_list.append(id_int)
                         print '-------------------------------------------------------'
                     else:
@@ -76,25 +77,25 @@ def find_house(url, history_list):
 
 def main():
     while True:
-        try:
-            history_list = []
-            with open('house_history.txt') as f:
-                for line in f:
-                    history_list.append(int(line))
+        # try:
+        history_list = []
+        with open('house_history.txt') as f:
+            for line in f:
+                history_list.append(int(line))
 
-            for i in range(0, 40):
-                nl = find_house(target_url_head + str(i*25), history_list)
+        for i in range(0, 40):
+            nl = find_house(target_url_head + str(i*25), history_list)
 
-                print 'Finished Page', i
+            print 'Finished Page', i
 
-                with open('house_history.txt', 'w') as f:
-                    if nl:
-                        for line in nl:
-                            print >>f, line
+            with open('house_history.txt', 'w') as f:
+                if nl:
+                    for line in nl:
+                        print >>f, line
 
-                time.sleep(random.randint(1, 3))
-        except Exception as e:
-            print e
+            time.sleep(random.randint(1, 3))
+        # except Exception as e:
+            # print e
 
         time.sleep(random.randint(10, 20))
 
