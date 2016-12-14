@@ -9,6 +9,7 @@ from mail import send
 import random
 import config
 from prices import *
+import re
 
 
 mail_sender = 'diamondzyy@163.com'
@@ -29,6 +30,17 @@ def gen_req(url):
     return req
 
 
+targets = [
+    u'中关村',
+    u'知春里',
+    u'知春路',
+    u'海淀黄庄',
+    u'人大',
+    u'双清路',
+    u'清华',
+]
+
+
 def find_house(url, history_list):
     req = gen_req(url)
     r = urllib2.urlopen(req).read()
@@ -37,64 +49,54 @@ def find_house(url, history_list):
     trs = soup.find_all('tr', class_='')
     for tr in trs:
         title_a = tr.findChild('a', class_='')
+        link = title_a['href']
         text = str(title_a)
         if 'title' in text:
-            print text.split('title=')[1]
-            print '-------------------------------------------------------'
+            m = re.search('title=\"((.|\n)*)\"', text)
+            if not m:
+                continue
+            title = m.group(1)
+            for target in targets:
+                if target.encode('utf8') in title:
+                    id_str = re.search('.*topic/(.*)/', link)
+                    if id_str:
+                        id_int = int(id_str.group(1))
+                        if id_int in history_list:
+                            break
+                        print title
+                        print link
+                        history_list.append(id_int)
+                        print '-------------------------------------------------------'
+                    else:
+                        print link
 
 
-def fish_scrawler(url, expected_price, history_list):
-    req = gen_req(url)
-    r = urllib2.urlopen(req).read()
-    soup = BeautifulSoup(r, "html.parser")
-    # print soup.prettify()
-    lis = soup.find_all('li', class_='item-info-wrapper item-idle clearfix')
-    item_list = []
-    for li in lis:
-        # print li
-        price_div = li.findChild('div', class_="item-price price-block")
-        price_em = price_div.findChild('em')
-        price = float(str(price_em).lstrip('<em>').rstrip('</em>'))
-
-        if price > expected_price:
-            continue
-
-        a = li.findChild('a')
-        link = 'http:' + a['href']
-        title = unicode(a.findChild('img')['alt'])
-        if link_to_id(link) in history_list:
-            continue
-
-        black = False
-        for word in black_list:
-            if word in title:
-                black = True
-                break
-        if black:
-            continue
-
-        item_list.append(link_to_id(link))
-        print '\t\t--->', title,
-        print '\t\t--->', link
-        if not config.Testing:
-            send(mail_sender, mail_receiver, title+'\n'+link)
-    return item_list
-
-
-
+    return history_list
 
 
 def main():
-    find_house(target_url_head+'0', [])
-    '''
     while True:
-        print '-------------------------------------------------------'
-        if config.Testing:
-            time.sleep(1)
-        else:
-            time.sleep(300)
-            '''
+        try:
+            history_list = []
+            with open('house_history.txt') as f:
+                for line in f:
+                    history_list.append(int(line))
 
+            for i in range(0, 40):
+                nl = find_house(target_url_head + str(i*25), history_list)
+
+                print 'Finished Page', i
+
+                with open('house_history.txt', 'w') as f:
+                    if nl:
+                        for line in nl:
+                            print >>f, line
+
+                time.sleep(random.randint(1, 3))
+        except Exception as e:
+            print e
+
+        time.sleep(random.randint(10, 20))
 
 
 if __name__ == '__main__':
