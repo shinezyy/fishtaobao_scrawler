@@ -158,7 +158,7 @@ def main():
                 print '正在爬取', k, 'Escaped:', item, 'Expected Price:', expected_prices[k]
                 if config.Testing:
                     print target_url_head + item + target_url_tail
-                new_list = fish_scrawler(target_url_head + k + target_url_tail,
+                new_list = fish_scrawler(target_url_head + item + target_url_tail,
                                          expected_prices[k], history_list)
                 time.sleep(random.randint(1, 3))
                 if new_list:
