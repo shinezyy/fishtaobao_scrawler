@@ -2,8 +2,8 @@
 
 
 from bs4 import BeautifulSoup
-import urllib2
-import urllib
+import urllib.request, urllib.error, urllib.parse
+import urllib.request, urllib.parse, urllib.error
 import time
 from mail import send
 import random
@@ -13,13 +13,14 @@ from prices import *
 
 mail_sender = 'diamondzyy@163.com'
 mail_receiver = 'diamondzyy@sina.cn'
-target_url_head = 'https://s.2.taobao.com/list/list.htm?' \
-        'spm=2007.1000337.6.2.x7MnnJ&st_edtime=1&q='
-target_url_tail = '&ist=0'
+
+target_url_head= 'https://s.2.taobao.com/list/list?q='
+
+target_url_tail = '&search_type=item&app=shopsearch'
 
 
 def gen_req(url):
-    req = urllib2.Request(
+    req = urllib.request.Request(
         url,
         data=None,
         headers={
@@ -36,23 +37,24 @@ def link_to_id(link):
 
 
 black_list = [
-    u'手机',
-    u'坏',
-    u'收',
-    u'尸体',
-    u'华为',
-    u'求购',
-    u'主板',
-    u'计算器',
-    u'转卖',
+    '手机',
+    '关联',
+    '坏',
+    '收',
+    '尸体',
+    '华为',
+    '求购',
+    '主板',
+    '计算器',
+    '转卖',
 ]
 
 
 def fish_scrawler(url, expected_price, history_list):
     req = gen_req(url)
-    r = urllib2.urlopen(req).read()
+    r = urllib.request.urlopen(req).read()
     soup = BeautifulSoup(r, "html.parser")
-    # print soup.prettify()
+    print(soup.prettify())
     lis = soup.find_all('li', class_='item-info-wrapper item-idle clearfix')
     item_list = []
     for li in lis:
@@ -66,7 +68,7 @@ def fish_scrawler(url, expected_price, history_list):
 
         a = li.findChild('a')
         link = 'http:' + a['href']
-        title = unicode(a.findChild('img')['alt'])
+        title = str(a.findChild('img')['alt'])
         if link_to_id(link) in history_list:
             continue
 
@@ -79,8 +81,8 @@ def fish_scrawler(url, expected_price, history_list):
             continue
 
         item_list.append(link_to_id(link))
-        print '\t\t--->', title,
-        print '\t\t--->', link
+        print('\t\t--->', title, end=' ')
+        print('\t\t--->', link)
         if not config.Testing:
             send(mail_sender, mail_receiver, title+'\n'+link)
     return item_list
@@ -105,43 +107,11 @@ def preproc_price():
         item = item.replace(' ', '+')
         item = item.replace('-', '+')
         price = int(price) - config.delta_price
-        print item, price
+        print(item, price)
         expected_prices[item] = price
 
 
 scrawl_fish = True
-
-
-def gz_board_scrawler(url, history_list):
-    req = gen_req(url)
-    r = urllib2.urlopen(req).read()
-    soup = BeautifulSoup(r, "html.parser")
-    # print soup.prettify()
-    bodies = soup.find_all('tbody')
-    thread_list = []
-    for bd in bodies:
-        if not bd['id'].startswith('normal'):
-            continue
-        tid = int(bd['id'].split('_')[1])
-        if tid in history_list:
-            continue
-        title = bd.findChild('a', class_='s xst')
-        link = title['href']
-        title_string = title.contents[0]
-        thread_list.append((title_string, link))
-    return thread_list
-
-gz_url = 'http://we.poppur.com/forum.php?mod=forumdisplay&fid=298&filter=author&orderby=dateline&typeid=50'
-
-
-def gz_thread(url, expected_price):
-    req = gen_req(url)
-    r = urllib2.urlopen(req).read()
-    soup = BeautifulSoup(r, "html.parser")
-    # print soup.prettify()
-    div = soup.findChild('div', class_='t_fsz')
-    content = div.findChild('font').string
-    return content
 
 
 def main():
@@ -154,21 +124,22 @@ def main():
                 for line in f:
                     history_list.append(int(line))
             for k in expected_prices:
-                item = urllib.quote(k.decode('utf-8').encode('gbk'))
-                print '正在爬取', k, 'Escaped:', item, 'Expected Price:', expected_prices[k]
+                print(k)
+                item = urllib.parse.quote(k.encode('gbk'))
+                print('正在爬取', k, 'Escaped:', item, 'Expected Price:', expected_prices[k])
                 if config.Testing:
-                    print target_url_head + item + target_url_tail
-                new_list = fish_scrawler(target_url_head + k + target_url_tail,
+                    print(target_url_head + item + target_url_tail)
+                new_list = fish_scrawler(target_url_head + item + target_url_tail,
                                          expected_prices[k], history_list)
                 time.sleep(random.randint(1, 3))
                 if new_list:
                     with open('history.txt', 'a') as f:
                         for line in new_list:
-                            print >>f, line
+                            print(line, file=f)
         except Exception as e:
-            print e
+            print(e)
 
-        print '-------------------------------------------------------'
+        print('-------------------------------------------------------')
         if config.Testing:
             time.sleep(1)
         else:

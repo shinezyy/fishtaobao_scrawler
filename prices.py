@@ -1,5 +1,7 @@
 # -*- coding:utf-8 -*-
 
+import pandas as pd
+
 
 raw_1155 = '''
 G530=100
@@ -66,3 +68,18 @@ raw_phone = '''
 魅族 mx3=220
 魅蓝=270
 '''
+
+
+def get_618_phone_price():
+    df = pd.read_csv('./data/phone-price-19618.csv',
+                     index_col=0, header=0, encoding='gbk')
+    return df
+
+
+def main():
+    get_618_phone_price()
+
+
+if __name__ == '__main__':
+    main()
+
