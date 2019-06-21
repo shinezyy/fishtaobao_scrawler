@@ -140,3 +140,5 @@ $RECYCLE.BIN/
 
 *.idea
 .password
+resources/history.txt
+resources/house_history.txt

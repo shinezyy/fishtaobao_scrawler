@@ -71,7 +71,7 @@ raw_phone = '''
 
 
 def get_618_phone_price():
-    df = pd.read_csv('./data/phone-price-19618.csv',
+    df = pd.read_csv('./resources/phone-price-19618.csv',
                      index_col=0, header=0, encoding='gbk')
     return df
 

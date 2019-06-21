@@ -36,49 +36,11 @@ def link_to_id(link):
     return int(link.split('id=')[1])
 
 
-black_list = [
-    '换',
-    '关联',
-    '坏',
-    '收',
-    '尸体',
-    '华为',
-    '求购',
-    '主板',
-    '计算器',
-    '壳',
-    '膜',
-    '充电器',
-    '快充',
-    '券',
-    '非',
-    '云拍',
-    '太容易',
-    '宫中号',
-    '拆机',
-    '总成',
-    '王者荣耀',
-    '王者',
-    'cos',
-    '预约',
-    '专柜',
-    '参加活动',
-    '红包',
-    '上海电信',
-    '解锁工具',
-    '官方旗舰店正品',
-    '苹果',
-    '步步高正品',
-    '电信套餐',
-    '荣耀V9',
-    '小米平板',
-    '床垫',
-    '分期',
-    '原装屏幕',
-    '别着急拍',
-    '是否有货',
-    '漏液',
-]
+def read_black_list():
+    bl = open('resources/keyword_blacklist.txt').read().split('\n')
+    bl = [line.strip() for line in bl]
+    return bl
+
 
 black_nick_list = [
     't_',
@@ -157,7 +119,7 @@ def get_items(url):
                 print(f'skip bot: {seller}')
                 break
 
-        for word in black_list:
+        for word in read_black_list():
             if word in title or word in desc:
                 black_flag = True
                 break
@@ -192,7 +154,7 @@ def main():
         while True:
             history_list = []
             # read history
-            with open('history.txt') as f:
+            with open('resources/history.txt') as f:
                 for line in f:
                     history_list.append(int(line))
             for k in phones:
@@ -239,7 +201,7 @@ def main():
                     time.sleep(random.randint(3, 15))
 
                 if len(new_list):
-                    with open('history.txt', 'a') as f:
+                    with open('resources/history.txt', 'a') as f:
                         for line in new_list:
                             print(line, file=f)
             break
