@@ -57,6 +57,32 @@ black_list = [
     '宫中号',
     '拆机',
     '总成',
+    '王者荣耀',
+    '王者',
+    'cos',
+    '预约',
+    '专柜',
+    '参加活动',
+    '红包',
+    '上海电信',
+    '解锁工具',
+    '官方旗舰店正品',
+    '苹果',
+    '步步高正品',
+    '电信套餐',
+    '荣耀V9',
+    '小米平板',
+    '床垫',
+    '分期',
+    '原装屏幕',
+    '别着急拍',
+    '是否有货',
+    '漏液',
+]
+
+black_nick_list = [
+    't_',
+    'tb',
 ]
 
 
@@ -115,14 +141,27 @@ def get_items(url):
         title_a = div.findChild('a', href=link)
         title = title_a['title']
 
+        seller_a = div.findChild('div', class_='seller-avatar').findChild('a')
+        seller = seller_a['title']  # type: str
+        # print(seller_a)
+        # print(seller)
+
         desc_div = div.findChild('div', class_='item-brief-desc')
         desc = desc_div.contents[0]
 
         black_flag = False
+
+        for nick in black_nick_list:
+            if seller.startswith(nick):  # bots
+                black_flag = True
+                print(f'skip bot: {seller}')
+                break
+
         for word in black_list:
             if word in title or word in desc:
                 black_flag = True
                 break
+
         if black_flag:
             continue
 
@@ -138,7 +177,7 @@ def get_items(url):
         # print(price)
         # print(spec_reformat(mem, flash))
 
-        items.append((link_to_id(link), 'https:' + link, mem_flash, price))
+        items.append((link_to_id(link), 'https:' + link, mem_flash, price, title, desc, seller))
     print('')
     return items
 
@@ -163,11 +202,10 @@ def main():
                     continue
                 item = urllib.parse.quote(col['name'].encode('gbk'))
                 print('正在爬取', k, 'Escaped:', item)
-                if config.Testing:
-                    print(target_url.format(item))
+                print(target_url.format(item))
                 items = get_items(target_url.format(item))
                 # print(items)
-                for item_id, link, spec, price in items:
+                for item_id, link, spec, price, title, desc, seller in items:
                     flag = False
                     if item_id in history_list:
                         continue
@@ -185,18 +223,20 @@ def main():
                             flag = True
                         else:
                             flag = False
+                    if price > config.max_price:
+                        flag = False
 
                     if flag:
-                        info = f'{k}\n{spec}\n{price}\n{link}'
+                        info = f'{k}\n{seller}\n{spec}\n{price}\n{link}\n{title}\n{desc}'
                         if config.Testing:
                             print(info)
                         else:
-                            send(mail_sender, mail_sender, info)
+                            send(mail_sender, mail_sender, f'{seller} {k}=={title}={price}', info)
 
                 if config.Testing:
                     time.sleep(1)
                 else:
-                    time.sleep(random.randint(1, 4))
+                    time.sleep(random.randint(3, 15))
 
                 if len(new_list):
                     with open('history.txt', 'a') as f:
@@ -210,7 +250,7 @@ def main():
         if config.Testing:
             time.sleep(2)
         else:
-            time.sleep(300)
+            time.sleep(random.randint(200, 300))
 
 
 if __name__ == '__main__':

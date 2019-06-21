@@ -9,14 +9,14 @@ from email.header import Header
 from email.mime.image import MIMEImage
 
 
-def send(sender, receiver, content):
+def send(sender, receiver, title, content):
     passwd = open('.password').read().strip()
     # print(passwd)
     print('Sending from', sender, 'to', receiver)
     msg = MIMEMultipart()
     msg['From'] = Header(sender)
     msg['To'] = Header(receiver)
-    msg['Subject'] = Header('found items', 'utf-8')
+    msg['Subject'] = Header(title, 'utf-8')
     msg.attach(MIMEText(content, 'plain', 'utf-8'))
 
     smtp = smtplib.SMTP()
@@ -34,4 +34,5 @@ def send(sender, receiver, content):
 if __name__ == '__main__':
     mail_sender = 'diamondzyy@163.com'
     mail_receiver = 'diamondzyy@sina.cn'
-    send(mail_sender, mail_sender, 'test')
+    send(mail_sender, mail_sender,
+         'tt', 'test')
