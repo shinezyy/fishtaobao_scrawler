@@ -76,6 +76,12 @@ def get_618_phone_price():
     return df
 
 
+def get_mid_end_phones():
+    df = pd.read_csv('./resources/mid-end-phones.txt', sep=',',
+                     index_col=None, header=None, encoding='utf8')
+    return df
+
+
 def main():
     get_618_phone_price()
 
