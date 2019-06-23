@@ -40,7 +40,7 @@ def spec_pattern_gen():
     mem_size = [2, 3, 4, 6, 8]
     flash_size = [16, 32, 64, 128, 256]
     units = ['', 'g', 'gb', 'G', 'GB']
-    connector = [' ', '+', '加']
+    connector = [' ', '+', '＋', '加']
     for mem in mem_size:
         for flash in flash_size:
             for u in units:
@@ -89,7 +89,7 @@ def get_items(url):
                 continue
 
         title_a = div.findChild('a', href=link)
-        title = title_a['title']
+        title = title_a['title'].lower()
 
         seller_a = div.findChild('div', class_='seller-avatar').findChild('a')
         seller = seller_a['title']  # type: str
@@ -97,7 +97,7 @@ def get_items(url):
         # print(seller)
 
         desc_div = div.findChild('div', class_='item-brief-desc')
-        desc = desc_div.contents[0]
+        desc = desc_div.contents[0].lower()
 
         black_flag = False
 
@@ -215,12 +215,12 @@ def mid_end():
 
     # print(phones)
     while scrawl_fish:
-        history_list = []
-        # read history
-        with open('resources/history.txt') as f:
-            for line in f:
-                history_list.append(int(line))
         for k in phones:
+            history_list = []
+            # read history
+            with open('resources/history.txt') as f:
+                for line in f:
+                    history_list.append(int(line))
             new_list = []
             item = urllib.parse.quote(k.encode('gbk'))
             print('正在爬取', k, 'Escaped:', item)
