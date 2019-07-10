@@ -19,6 +19,8 @@ mail_sender = 'diamondzyy@163.com'
 target_url = 'https://s.2.taobao.com/list/list?q={}' \
              '&search_type=item&&st_edtime=1&app=shopsearch'
 
+price_url = 'https://s.2.taobao.com/list/?start={}&end={}&cpp=true&ist=1&userId=0&st_edtime=1&q={}'
+
 
 def link_to_id(link):
     return int(link.split('id=')[1])
@@ -210,63 +212,78 @@ def find_in_618():
 
 
 def mid_end():
-    phones = get_mid_end_phones().values.reshape(-1)
+    phones = get_835().values.reshape(-1)
     np.random.shuffle(phones)
 
     # print(phones)
-    while scrawl_fish:
-        for k in phones:
-            history_list = []
-            # read history
-            with open('resources/history.txt') as f:
-                for line in f:
-                    history_list.append(int(line))
-            new_list = []
-            item = urllib.parse.quote(k.encode('gbk'))
-            print('正在爬取', k, 'Escaped:', item)
-            print(target_url.format(item))
-            items = get_items(target_url.format(item))
-            # print(items)
-            for item_id, link, spec, price, title, desc, seller in items:
-                flag = False
-                if item_id in history_list:
-                    continue
-                new_list.append(item_id)
-                # print('col[spec]', col[spec])
-                # print('get_lowest_price', get_lowest_price(col))
+    for k in phones:
+        history_list = []
+        # read history
+        with open('resources/history.txt') as f:
+            for line in f:
+                history_list.append(int(line))
+        new_list = []
+        item = urllib.parse.quote(k.encode('gbk'))
+        print('正在爬取', k, 'Escaped:', item)
+        url = price_url.format(config.min_price, config.max_price, item)
+        print(url)
+        items = get_items(url)
+        # print(items)
+        for item_id, link, spec, price, title, desc, seller in items:
+            flag = False
+            if item_id in history_list:
+                continue
+            new_list.append(item_id)
+            # print('col[spec]', col[spec])
+            # print('get_lowest_price', get_lowest_price(col))
 
-                if config.min_price <= price <= config.max_price:
-                    flag = True
+            if config.min_price <= price <= config.max_price:
+                flag = True
 
-                if flag:
-                    info = f'{k}\n{seller}\n{spec}\n{price}\n{link}\n{title}\n{desc}'
-                    if config.Testing:
-                        print(info)
-                    else:
-                        send(mail_sender, mail_sender, f'{seller} {k}=={title}={price}', info)
+            if flag:
+                info = f'{k}\n{seller}\n{spec}\n{price}\n{title}\n{desc}'
+                if config.Testing:
+                    print(info)
+                    send(mail_sender, mail_sender, f'【{k}】【{price}】{title}',
+                            info, link)
+                    sys.exit(0)
                 else:
-                    c.dprint(config.Online, f"P:{price} ", end='')
-
-            if config.Testing:
-                time.sleep(1)
+                    send(mail_sender, mail_sender, f'【{k}】【{price}】{title}',
+                            info, link)
             else:
-                time.sleep(random.randint(3, 15))
+                c.dprint(config.Online, f"P:{price} ", end='')
 
-            if len(new_list):
-                with open('resources/history.txt', 'a') as f:
-                    for line in new_list:
-                        print(line, file=f)
-
-        # except Exception as e:
-        #     print(e)
-
-        print('=======================================================')
         if config.Testing:
-            time.sleep(2)
+            time.sleep(1)
         else:
-            time.sleep(random.randint(200, 300))
+            time.sleep(random.randint(9, 19))
+
+        if len(new_list):
+            with open('resources/history.txt', 'a') as f:
+                for line in new_list:
+                    print(line, file=f)
+
+    # except Exception as e:
+    #     print(e)
+
+    print('=======================================================')
+    if config.Testing:
+        time.sleep(2)
+    else:
+        time.sleep(random.randint(45, 75))
 
 
 
 if __name__ == '__main__':
-    mid_end()
+    continuous_exception = False
+    exception_once = False
+    while True:
+        try:
+            exception_once = False
+            mid_end()
+        except Exception as e:
+            print(e)
+            if exception_once:
+                break;
+            exception_once = True
+            time.sleep(random.randint(300, 400))

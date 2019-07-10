@@ -81,6 +81,12 @@ def get_mid_end_phones():
                      index_col=None, header=None, encoding='utf8')
     return df
 
+def get_835():
+    df = pd.read_csv('./resources/snapdragon-835.txt', sep=',',
+                     index_col=None, header=None, encoding='utf8')
+    return df
+
+
 
 def main():
     get_618_phone_price()

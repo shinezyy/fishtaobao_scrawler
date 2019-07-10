@@ -9,7 +9,7 @@ from email.header import Header
 from email.mime.image import MIMEImage
 
 
-def send(sender, receiver, title, content):
+def send(sender, receiver, title, content, link=None):
     passwd = open('.password').read().strip()
     # print(passwd)
     print('Sending from', sender, 'to', receiver)
@@ -17,7 +17,18 @@ def send(sender, receiver, title, content):
     msg['From'] = Header(sender)
     msg['To'] = Header(receiver)
     msg['Subject'] = Header(title, 'utf-8')
-    msg.attach(MIMEText(content, 'plain', 'utf-8'))
+    # msg.attach(MIMEText(content, 'text', 'utf-8'))
+    link_template = """
+    <html>
+    <head></head>
+      <body>
+        <p>{}</p>
+        <a href="{}">【Click here】</a>
+      </body>
+    </html>
+    """.format(content.replace('\n', '<br>'), link)
+    if not link is None:
+        msg.attach(MIMEText(link_template, 'html' ,'utf-8'))
 
     smtp = smtplib.SMTP()
     try:
